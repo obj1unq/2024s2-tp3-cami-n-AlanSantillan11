@@ -1,0 +1,64 @@
+import camion.*
+import cosas.*
+import caminos.*
+import destinos.*
+
+test "el Camion" {
+assert.equals(1000, camion.pesoVacio() )
+camion.cargar(arenaDeGranel)
+camion.cargar(bumblebee)
+assert.equals(1820, camion.pesoTotal())
+assert.notThat(camion.excedidoDePeso())
+}
+test "las cosas"{
+assert.equals(500, knightRider.peso())
+assert.equals(10, knightRider.nivelPeligrosidad())
+assert.equals(800, bumblebee.peso())
+assert.equals(15, bumblebee.nivelPeligrosidad())
+assert.equals(200, residuos.nivelPeligrosidad())
+
+}
+test "agregados al camion" {
+    camion.cargar(bumblebee)
+    assert.that(camion.tieneAlgoQuePesaEntre(700,1000))
+    camion.cargar(knightRider)
+    assert.equals(bumblebee, camion.cosaMasPesada() )
+    assert.equals(3, camion.totalBultos())
+    camion.cargar(paqueteDeLadrillos)
+    assert.equals(4, camion.totalBultos())
+
+}
+test "consecuencias de carga" {
+    camion.cargar(paqueteDeLadrillos)
+    assert.equals(12, paqueteDeLadrillos.cantidadLadrillos())
+    camion.cargar(arenaDeGranel)
+    assert.equals(20, arenaDeGranel.peso())
+    camion.cargar(bateriaAntiaerea)
+    assert.that(bateriaAntiaerea.misiles())
+    camion.cargar(residuos)
+    assert.equals(15, residuos.peso())
+    camion.cargar(bumblebee)
+    assert.equals(30, bumblebee.nivelPeligrosidad())
+
+}
+test "No llega por Peligroso ruta 9" {
+    camion.cargar(bumblebee)//peligroso 30 por que se transforma
+    assert.throwsExceptionWithMessage("viaje no validado", {ruta9.validarViajePor(camion)})//max peligrosidad ruta9 11
+
+}
+test "no llega por peso camino vecinales" {
+    camion.cargar(bumblebee)//SU peso es 800 
+    assert.throwsExceptionWithMessage("viaje no validado", {caminosVecinales.validarViajePor(camion)})//el peso maximo es 100
+}
+test "si llega almacen x ruta 9" {
+
+    camion.cargar(arenaDeGranel)
+    camion.transportar(almacen, ruta9)
+    assert.equals(#{arenaDeGranel}, almacen.stock())
+}
+test "si llega almacen x caminos vecinales"{
+    caminosVecinales.pesoMaximoSoportado(2000)
+    camion.cargar(arenaDeGranel)
+    camion.transportar(almacen, caminosVecinales)
+    assert.equals(#{arenaDeGranel}, almacen.stock())
+}
