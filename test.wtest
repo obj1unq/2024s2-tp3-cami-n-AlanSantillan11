@@ -3,34 +3,49 @@ import cosas.*
 import caminos.*
 import destinos.*
 
-test "el Camion" {
-assert.equals(1000, camion.pesoVacio() )
-camion.cargar(arenaDeGranel)
-camion.cargar(bumblebee)
-assert.equals(1820, camion.pesoTotal())
-assert.notThat(camion.excedidoDePeso())
-}
-test "las cosas"{
-assert.equals(500, knightRider.peso())
-assert.equals(10, knightRider.nivelPeligrosidad())
-assert.equals(800, bumblebee.peso())
-assert.equals(15, bumblebee.nivelPeligrosidad())
-assert.equals(200, residuos.nivelPeligrosidad())
-
-}
-test "agregados al camion" {
+describe "camion" {
+  test "el Camion" {
+    const camion = new Camion(cosas = #{arenaDeGranel})
+    
+    assert.equals(1000, camion.pesoVacio())
+    camion.cargar(arenaDeGranel)
     camion.cargar(bumblebee)
-    assert.that(camion.tieneAlgoQuePesaEntre(700,1000))
+    assert.equals(1820, camion.pesoTotal())
+    assert.notThat(camion.excedidoDePeso())
+  }
+  
+  test "las cosas" {
+    const camion = new Camion(cosas = #{arenaDeGranel})
+    const embalaje1 = new Embalaje(envuelto = bumblebee)
+    
+    
+    assert.equals(500, knightRider.peso())
+    assert.equals(10, knightRider.nivelPeligrosidad())
+    assert.equals(800, bumblebee.peso())
+    assert.equals(15, bumblebee.nivelPeligrosidad())
+    assert.equals(200, residuos.nivelPeligrosidad())
+    assert.equals(bumblebee, embalaje1.envuelto())
+  }
+  
+  test "agregados al camion" {
+    const camion = new Camion(cosas = #{arenaDeGranel})
+    const paqueteDeLadrillos = new PaqueteDeLadrillos(cantidadLadrillos = 100)
+    
+    camion.cargar(bumblebee)
+    assert.that(camion.tieneAlgoQuePesaEntre(700, 1000))
     camion.cargar(knightRider)
-    assert.equals(bumblebee, camion.cosaMasPesada() )
-    assert.equals(3, camion.totalBultos())
-    camion.cargar(paqueteDeLadrillos)
+    assert.equals(bumblebee, camion.cosaMasPesada())
     assert.equals(4, camion.totalBultos())
-
-}
-test "consecuencias de carga" {
     camion.cargar(paqueteDeLadrillos)
-    assert.equals(12, paqueteDeLadrillos.cantidadLadrillos())
+    assert.equals(6, camion.totalBultos())
+  }
+  
+  test "consecuencias de carga" {
+    const camion = new Camion(cosas = #{arenaDeGranel})
+    const paqueteDeLadrillos = new PaqueteDeLadrillos(cantidadLadrillos = 100)
+    
+    camion.cargar(paqueteDeLadrillos)
+    assert.equals(112, paqueteDeLadrillos.cantidadLadrillos())
     camion.cargar(arenaDeGranel)
     assert.equals(20, arenaDeGranel.peso())
     camion.cargar(bateriaAntiaerea)
@@ -39,26 +54,42 @@ test "consecuencias de carga" {
     assert.equals(15, residuos.peso())
     camion.cargar(bumblebee)
     assert.equals(30, bumblebee.nivelPeligrosidad())
-
-}
-test "No llega por Peligroso ruta 9" {
-    camion.cargar(bumblebee)//peligroso 30 por que se transforma
-    assert.throwsExceptionWithMessage("viaje no validado", {ruta9.validarViajePor(camion)})//max peligrosidad ruta9 11
-
-}
-test "no llega por peso camino vecinales" {
-    camion.cargar(bumblebee)//SU peso es 800 
-    assert.throwsExceptionWithMessage("viaje no validado", {caminosVecinales.validarViajePor(camion)})//el peso maximo es 100
-}
-test "si llega almacen x ruta 9" {
-
+  }
+  
+  test "No llega por Peligroso ruta 9" {
+    const camion = new Camion(cosas = #{arenaDeGranel})
+    
+    camion.cargar(bumblebee) //peligroso 30 por que se transforma
+    assert.throwsExceptionWithMessage(
+      "viaje no validado",
+      { ruta9.validarViajePor(camion) }
+    ) //max peligrosidad ruta9 11
+  }
+  
+  test "no llega por peso camino vecinales" {
+    const camion = new Camion(cosas = #{arenaDeGranel})
+    
+    camion.cargar(bumblebee) //SU peso es 800 
+    assert.throwsExceptionWithMessage(
+      "viaje no validado",
+      { caminosVecinales.validarViajePor(camion) }
+    ) //el peso maximo es 100
+  }
+  
+  test "si llega almacen x ruta 9" {
+    const camion = new Camion(cosas = #{arenaDeGranel})
+    
     camion.cargar(arenaDeGranel)
     camion.transportar(almacen, ruta9)
     assert.equals(#{arenaDeGranel}, almacen.stock())
-}
-test "si llega almacen x caminos vecinales"{
+  }
+  
+  test "si llega almacen x caminos vecinales" {
+    const camion = new Camion(cosas = #{arenaDeGranel})
+    
     caminosVecinales.pesoMaximoSoportado(2000)
     camion.cargar(arenaDeGranel)
     camion.transportar(almacen, caminosVecinales)
     assert.equals(#{arenaDeGranel}, almacen.stock())
+  }
 }
